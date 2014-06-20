@@ -98,7 +98,7 @@ class openresty(
   exec { 'configure openresty':
     cwd     => "${tmp}/ngx_openresty-${version}",
     path    => '/sbin:/bin:/usr/bin',
-    command => "./configure ${params}",
+    command => "${tmp}/ngx_openresty-${version}/configure ${params}",
     creates => "${tmp}/ngx_openresty-${version}/build",
     require => Package['perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'],
     notify  => Exec['install openresty'],
