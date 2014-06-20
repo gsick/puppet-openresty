@@ -37,7 +37,7 @@
 #
 class openresty(
   $version          = hiera('openresty::version', '1.7.0.1'),
-  $configure_params = hiera('openresty::configure_params', {}),
+  $configure_params = hiera('openresty::configure_params', []),
   $tmp              = hiera('openresty::tmp', '/tmp')
 ) {
 
