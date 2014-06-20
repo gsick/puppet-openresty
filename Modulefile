@@ -1,0 +1,10 @@
+name         'gsick-openresty'
+version      '0.0.1'
+source       'https://github.com/gsick/puppet-openresty.git'
+author       'Gamaliel Sick'
+license      'MIT'
+summary      'OpenResty installation module'
+description  'Puppet module for installing OpenResty'
+project_page 'https://github.com/gsick/puppet-openresty'
+
+dependency   'puppetlabs/stdlib', '>= 4.2.2'
