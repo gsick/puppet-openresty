@@ -37,11 +37,28 @@
 #
 class openresty(
   $version          = hiera('openresty::version', '1.7.0.1'),
+  $user             = hiera('openresty::user', 'nginx'),
+  $group            = hiera('openresty::group', 'nginx'),
   $configure_params = hiera('openresty::configure_params', []),
   $tmp              = hiera('openresty::tmp', '/tmp')
 ) {
 
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
+
+  group { 'openresty group':
+    name   => "${group}",
+    ensure => 'present',
+  }
+
+  user { 'openresty user':
+    name    => "${user}",
+    ensure  => 'present',
+    groups  => "${group}",
+    comment => 'nginx web server',
+    shell   => '/sbin/nologin',
+    system  => true,
+    require => Group['openresty group'],
+  }
 
   exec { 'download openresty':
     cwd     => $tmp,
@@ -61,6 +78,20 @@ class openresty(
   }
 
   validate_array($configure_params)
+  $default_params = ["--user=${user}", "--group=${group}"]
+  concat($default_params, '--sbin-path=/usr/sbin/nginx')
+  concat($default_params, '--conf-path=/etc/nginx/nginx.conf')
+  concat($default_params, '--pid-path=/var/run/nginx.pid')
+  concat($default_params, '--lock-path=/var/lock/subsys/nginx.lock')
+  concat($default_params, '--error-log-path=/var/log/nginx/error.log')
+  concat($default_params, '--http-log-path=/var/log/nginx/access.log')
+  concat($default_params, '--http-client-body-temp-path=/var/cache/nginx/client_temp')
+  concat($default_params, '--http-proxy-temp-path=/var/cache/nginx/proxy_temp')
+  concat($default_params, '--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp')
+  concat($default_params, '--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp')
+  concat($default_params, '--http-scgi-temp-path=/var/cache/nginx/scgi_temp')
+
+  concat($configure_params, $default_params)
   $params = join($configure_params, ' ')
 
   exec { 'configure openresty':
@@ -77,8 +108,15 @@ class openresty(
     path    => '/sbin:/bin:/usr/bin',
     command => 'make && make install',
     creates => '/usr/local/openresty/nginx/sbin/nginx',
-    require => Exec['configure openresty'],
+    require => [User['openresty user'], Exec['configure openresty']],
   }
 
-
+  service { 'nginx':
+    ensure     => running,
+    name       => 'nginx',
+    enable     => true,
+    hasrestart => false,
+    restart    => '/etc/init.d/nginx reload',
+    require    => Exec['install openresty'],
+  }
 }
