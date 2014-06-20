@@ -36,12 +36,12 @@
 # Copyright 2014 Agilience, Gamaliel Sick, unless otherwise noted.
 #
 class openresty(
-  $version = hiera('openresty::version', '1.7.0.1'),
+  $version          = hiera('openresty::version', '1.7.0.1'),
   $configure_params = hiera('openresty::configure_params', {}),
-  $tmp     = hiera('openresty::tmp', '/tmp')
+  $tmp              = hiera('openresty::tmp', '/tmp')
 ) {
 
-  ensure_packages('wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel')
+  ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
 
   exec { 'download openresty':
     cwd     => $tmp,
