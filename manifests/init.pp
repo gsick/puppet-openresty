@@ -90,6 +90,7 @@ class openresty(
   concat($default_params, '--http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp')
   concat($default_params, '--http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp')
   concat($default_params, '--http-scgi-temp-path=/var/cache/nginx/scgi_temp')
+  concat($default_params, '--with-http_gzip_static_module')
 
   concat($configure_params, $default_params)
   $params = join($configure_params, ' ')
