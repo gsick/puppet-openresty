@@ -7,5 +7,5 @@ describe 'openresty' do
 
   it { should contain_package('wget') }
   it { should contain_package('perl') }
-  
+
 end
