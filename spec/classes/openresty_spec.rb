@@ -15,14 +15,14 @@ describe 'openresty' do
   context "with default param" do
 
     it do
-      should_contain_group('openresty group').with({
+      should contain_group('openresty group').with({
         'ensure' => 'present',
         'name'   => 'nginx',
       })
     end
 
     it do
-      should_contain_user('openresty user').with({
+      should contain_user('openresty user').with({
         'ensure'  => 'present',
         'name'    => 'nginx',
         'groups'  => 'nginx',
@@ -34,7 +34,7 @@ describe 'openresty' do
     end
 
     it do
-      should_contain_exec('download openresty').with({
+      should contain_exec('download openresty').with({
         'cwd'     => '/tmp',
         'path'    => '/sbin:/bin:/usr/bin',
         'command' => 'wget http://openresty.org/download/ngx_openresty-1.7.0.1.tar.gz',
@@ -45,7 +45,7 @@ describe 'openresty' do
     end
 
     it do
-      should_contain_exec('untar openresty').with({
+      should contain_exec('untar openresty').with({
         'cwd'     => '/tmp',
         'path'    => '/sbin:/bin:/usr/bin',
         'command' => 'tar -zxvf ngx_openresty-1.7.0.1.tar.gz',
@@ -55,7 +55,7 @@ describe 'openresty' do
     end
 
     it do
-      should_contain_exec('configure openresty').with({
+      should contain_exec('configure openresty').with({
         'cwd'     => '/tmp/ngx_openresty-1.7.0.1',
         'path'    => '/sbin:/bin:/usr/bin',
         'command' => '/tmp/ngx_openresty-1.7.0.1/configure --user=nginx --group=nginx',

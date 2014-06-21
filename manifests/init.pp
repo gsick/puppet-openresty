@@ -51,7 +51,7 @@ class openresty(
   }
 
   user { 'openresty user':
-    ensure => 'present',
+    ensure  => 'present',
     name    => $user,
     groups  => $group,
     comment => 'nginx web server',
