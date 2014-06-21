@@ -46,14 +46,14 @@ class openresty(
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
 
   group { 'openresty group':
-    name   => "${group}",
     ensure => 'present',
+    name   => $group,
   }
 
   user { 'openresty user':
-    name    => "${user}",
-    ensure  => 'present',
-    groups  => "${group}",
+    ensure => 'present',
+    name    => $user,
+    groups  => $group,
     comment => 'nginx web server',
     shell   => '/sbin/nologin',
     system  => true,
