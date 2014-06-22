@@ -36,14 +36,12 @@
 # Copyright 2014 Agilience, Gamaliel Sick, unless otherwise noted.
 #
 class openresty(
-  $version          = hiera('openresty::version', '1.7.0.1'),
-  $user             = hiera('openresty::user', 'nginx'),
-  $group            = hiera('openresty::group', 'nginx'),
-  $nginx_like_install = 
-
-  
-  $configure_params = hiera_array('openresty::configure_params', []),
-  $tmp              = hiera('openresty::tmp', '/tmp')
+  $version            = hiera('openresty::version', '1.7.0.1'),
+  $user               = hiera('openresty::user', 'nginx'),
+  $group              = hiera('openresty::group', 'nginx'),
+  $nginx_like_install = hiera('openresty::nginx_like_install', false),
+  $configure_params   = hiera_array('openresty::configure_params', []),
+  $tmp                = hiera('openresty::tmp', '/tmp')
 ) {
 
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
