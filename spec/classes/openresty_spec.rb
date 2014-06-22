@@ -22,12 +22,23 @@ describe 'openresty' do
     end
 
     it do
+      should contain_file('openresty home').with({
+        'ensure' => 'directory',
+        'path'   => '/var/cache/nginx',
+        'owner'  => 'root',
+        'group'  => 'root',
+        'mode'   => '0755',
+      })
+    end
+
+    it do
       should contain_user('openresty user').with({
         'ensure'  => 'present',
         'name'    => 'nginx',
         'groups'  => 'nginx',
         'comment' => 'nginx web server',
         'shell'   => '/sbin/nologin',
+        'home'    => '/var/cache/nginx',
         'system'  => 'true',
         'require' => 'Group[openresty group]',
       })
@@ -76,13 +87,24 @@ describe 'openresty' do
     end
 
     it do
+      should contain_file('openresty init script').with({
+        'ensure'  => 'file',
+        'path'    => '/etc/init.d/nginx',
+        'content' => 'template(openresty/openresty.erb)',
+        'owner'   => 'root',
+        'group'   => 'root',
+        'mode'    => '0755',
+      })
+    end
+
+    it do
       should contain_service('nginx').with({
         'ensure'     => 'running',
         'name'       => 'nginx',
         'enable'     => 'true',
         'hasrestart' => 'false',
         'restart'    => '/etc/init.d/nginx reload',
-        'require'    => 'Exec[install openresty]',
+        'require'    => ['Exec[install openresty]', 'File[openresty init script]'],
       })
     end
   end
