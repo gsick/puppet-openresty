@@ -50,14 +50,23 @@ class openresty(
     name   => $group,
   }
 
+  file { 'openresty home':
+    ensure => 'directory',
+    path   => '/var/cache/nginx',
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+
   user { 'openresty user':
     ensure  => 'present',
     name    => $user,
     groups  => $group,
     comment => 'nginx web server',
     shell   => '/sbin/nologin',
+    home    => '/var/cache/nginx',
     system  => true,
-    require => Group['openresty group'],
+    require => [Group['openresty group'], File['openresty home']],
   }
 
   exec { 'download openresty':
