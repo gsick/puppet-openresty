@@ -39,6 +39,9 @@ class openresty(
   $version          = hiera('openresty::version', '1.7.0.1'),
   $user             = hiera('openresty::user', 'nginx'),
   $group            = hiera('openresty::group', 'nginx'),
+  $nginx_like_install = 
+
+  
   $configure_params = hiera_array('openresty::configure_params', []),
   $tmp              = hiera('openresty::tmp', '/tmp')
 ) {
@@ -107,12 +110,38 @@ class openresty(
     require => [User['openresty user'], Exec['configure openresty']],
   }
 
+  $nginx_bin_file  = $nginx_like_install ? {
+    true    => '/usr/sbin/nginx',
+    default => '/usr/local/openresty/nginx/sbin/nginx',
+  }
+  $nginx_conf_file = $nginx_like_install ? {
+    true    => '/etc/nginx/nginx.conf',
+    default => '/usr/local/openresty/nginx/conf/nginx.conf',
+  }
+  $nginx_pid_file  = $nginx_like_install ? {
+    true    => '/var/run/nginx.pid',
+    default => '/usr/local/openresty/nginx/logs/nginx.pid',
+  }
+  $nginx_lock_file = $nginx_like_install ? {
+    true    => '/var/lock/subsys/nginx',
+    default => '/usr/local/openresty/nginx/logs/nginx',
+  }
+
+  file { 'openresty init script':
+    ensure  => 'file',
+    path    => '/etc/init.d/nginx',
+    content => template("${module_name}/openresty.erb"),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0755',
+  }
+
   service { 'nginx':
     ensure     => running,
     name       => 'nginx',
     enable     => true,
     hasrestart => false,
     restart    => '/etc/init.d/nginx reload',
-    require    => Exec['install openresty'],
+    require    => [Exec['install openresty'], File['openresty init script']],
   }
 }
