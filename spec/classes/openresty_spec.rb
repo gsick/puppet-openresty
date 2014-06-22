@@ -90,7 +90,6 @@ describe 'openresty' do
       should contain_file('openresty init script').with({
         'ensure'  => 'file',
         'path'    => '/etc/init.d/nginx',
-        'content' => 'template(openresty/openresty.erb)',
         'owner'   => 'root',
         'group'   => 'root',
         'mode'    => '0755',

@@ -124,7 +124,7 @@ class openresty(
     true    => '/var/lock/subsys/nginx',
     default => '/usr/local/openresty/nginx/logs/nginx',
   }
-notice($module_name)
+
   file { 'openresty init script':
     ensure  => 'file',
     path    => '/etc/init.d/nginx',
