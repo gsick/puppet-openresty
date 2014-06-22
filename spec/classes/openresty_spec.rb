@@ -40,7 +40,7 @@ describe 'openresty' do
         'shell'   => '/sbin/nologin',
         'home'    => '/var/cache/nginx',
         'system'  => 'true',
-        'require' => 'Group[openresty group]',
+        'require' => ['Group[openresty group]', 'File[openresty home]'],
       })
     end
 
@@ -126,8 +126,9 @@ describe 'openresty' do
         'groups'  => 'openresty',
         'comment' => 'nginx web server',
         'shell'   => '/sbin/nologin',
+        'home'    => '/var/cache/nginx',
         'system'  => 'true',
-        'require' => 'Group[openresty group]',
+        'require' => ['Group[openresty group]', 'File[openresty home]'],
       })
     end
 
