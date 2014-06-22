@@ -1,0 +1,13 @@
+<%= @nginx_log_dir %>/*.log {
+        daily
+        missingok
+        rotate 52
+        compress
+        delaycompress
+        notifempty
+        create 640 nginx adm
+        sharedscripts
+        postrotate
+                [ -f <%= @nginx_pid_file %> ] && kill -USR1 `cat <%= @nginx_pid_file %>`
+        endscript
+}

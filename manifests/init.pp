@@ -41,8 +41,18 @@ class openresty(
   $group              = hiera('openresty::group', 'nginx'),
   $nginx_like_install = hiera('openresty::nginx_like_install', false),
   $configure_params   = hiera_array('openresty::configure_params', []),
-  $tmp                = hiera('openresty::tmp', '/tmp')
+  $tmp                = hiera('openresty::tmp', '/tmp'),
+  $service_ensure     = hiera('openresty::service_ensure', 'running'),
+  $service_enable     = hiera('openresty::service_enable', 'true'),
 ) {
+
+  validate_string($version)
+  validate_string($user)
+  validate_string($group)
+  validate_bool($nginx_like_install)
+  validate_array($configure_params)
+  validate_absolute_path($tmp)
+  validate_string($service_ensure)
 
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
 
@@ -87,7 +97,6 @@ class openresty(
     notify  => Exec['configure openresty'],
   }
 
-  validate_array($configure_params)
   $default_params = ["--user=${user}", "--group=${group}"]
   $params = join(concat($configure_params, $default_params), ' ')
 
@@ -124,6 +133,19 @@ class openresty(
     true    => '/var/lock/subsys/nginx',
     default => '/usr/local/openresty/nginx/logs/nginx',
   }
+  $nginx_log_dir   = $nginx_like_install ? {
+    true    => '/var/log/nginx',
+    default => '/usr/local/openresty/nginx/logs',
+  }
+
+  file { 'openresty logrotate':
+    ensure  => 'file',
+    path    => '/etc/logrotate.d/nginx',
+    content => template("${module_name}/openresty.logrotate.erb"),
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0644',
+  }
 
   file { 'openresty init script':
     ensure  => 'file',
@@ -135,9 +157,10 @@ class openresty(
   }
 
   service { 'nginx':
-    ensure     => running,
+    ensure     => $service_ensure,
     name       => 'nginx',
-    enable     => true,
+    enable     => $service_enable,
+    hasstatus  => true,
     hasrestart => false,
     restart    => '/etc/init.d/nginx reload',
     require    => [Exec['install openresty'], File['openresty init script']],

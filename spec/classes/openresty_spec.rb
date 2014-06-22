@@ -101,6 +101,7 @@ describe 'openresty' do
         'ensure'     => 'running',
         'name'       => 'nginx',
         'enable'     => 'true',
+        'hasstatus'  => 'true',
         'hasrestart' => 'false',
         'restart'    => '/etc/init.d/nginx reload',
         'require'    => ['Exec[install openresty]', 'File[openresty init script]'],
