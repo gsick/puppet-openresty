@@ -42,6 +42,7 @@ class openresty(
   $nginx_like_install     = hiera('openresty::nginx_like_install', false),
   $configure_params       = hiera_array('openresty::configure_params', []),
   $with_pcre              = hiera(openresty::with_pcre, false),
+  $pcre_version           = hiera(openresty::with_pcre_version, '8.35'),
   $with_lua_resty_http    = hiera('openresty::with_lua_resty_http', false),
   $lua_resty_http_version = hiera('openresty::lua_resty_http_version', '0.03'),
   $tmp                    = hiera('openresty::tmp', '/tmp'),
@@ -54,6 +55,8 @@ class openresty(
   validate_string($group)
   validate_bool($nginx_like_install)
   validate_array($configure_params)
+  validate_bool($with_pcre)
+  validate_string($pcre_version)
   validate_bool($with_lua_resty_http)
   validate_string($lua_resty_http_version)
   validate_absolute_path($tmp)
@@ -102,7 +105,34 @@ class openresty(
     notify  => Exec['configure openresty'],
   }
 
-  $default_params = ["--user=${user}", "--group=${group}"]
+  if($with_pcre) {
+    exec { 'download pcre':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "http://downloads.sourceforge.net/project/pcre/pcre/${pcre_version}/pcre-${pcre_version}.tar.bz2",
+      creates => "${tmp}/pcre-${pcre_version}.tar.bz2",
+      notify  => Exec['untar pcre'],
+      require => Package['wget'],
+    }
+
+    exec { 'untar pcre':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "tar xjf pcre-${pcre_version}.tar.bz2",
+      creates => "${tmp}/pcre-${pcre_version}/configure",
+      notify  => Exec['configure openresty'],
+    }
+
+    $default_params = ["--user=${user}",
+                       "--group=${group}",
+                      "--with-pcre",
+                      "--with-pcre=${tmp}/pcre-${pcre_version}",
+                      "--with-pcre-conf-opt=--enable-utf",
+                      "--with-pcre-jit"]
+  } else {
+    $default_params = ["--user=${user}", "--group=${group}"]
+  }
+
   $params = join(concat($configure_params, $default_params), ' ')
 
   exec { 'configure openresty':
