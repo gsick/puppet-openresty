@@ -109,7 +109,7 @@ class openresty(
     exec { 'download pcre':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "http://downloads.sourceforge.net/project/pcre/pcre/${pcre_version}/pcre-${pcre_version}.tar.bz2",
+      command => "wget ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-${pcre_version}.tar.bz2",
       creates => "${tmp}/pcre-${pcre_version}.tar.bz2",
       notify  => Exec['untar pcre'],
       require => Package['wget'],
