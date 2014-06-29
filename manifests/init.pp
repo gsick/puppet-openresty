@@ -45,6 +45,8 @@ class openresty(
   $pcre_version           = hiera(openresty::with_pcre_version, '8.35'),
   $with_lua_resty_http    = hiera('openresty::with_lua_resty_http', false),
   $lua_resty_http_version = hiera('openresty::lua_resty_http_version', '0.03'),
+  $with_statsd            = hiera(openresty::with_statsd, false),
+  $statsd_version         = hiera(openresty::statsd_version, 'master'),
   $tmp                    = hiera('openresty::tmp', '/tmp'),
   $service_ensure         = hiera('openresty::service_ensure', 'running'),
   $service_enable         = hiera('openresty::service_enable', 'true'),
@@ -105,6 +107,27 @@ class openresty(
     notify  => Exec['configure openresty'],
   }
 
+  if($with_statsd) {
+    exec { 'download nginx-statsd':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O nginx-statsd-${statsd_version}.tar.gz https://github.com/zebrafishlabs/nginx-statsd/tarball/${statsd_version}",
+      creates => "${tmp}/nginx-statsd-${statsd_version}.tar.gz",
+      notify  => Exec['untar nginx-statsd'],
+      require => Package['wget'],
+    }
+
+    exec { 'untar nginx-statsd':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "tar -zxvf nginx-statsd-${statsd_version}.tar.gz",
+      creates => "${tmp}/nginx-statsd-${statsd_version}/config",
+      notify  => Exec['configure openresty'],
+    }
+
+    $statsd_params = ["--add-module=${tmp}/nginx-statsd-${statsd_version}"]
+  }
+
   if($with_pcre) {
     exec { 'download pcre':
       cwd     => $tmp,
@@ -123,14 +146,22 @@ class openresty(
       notify  => Exec['configure openresty'],
     }
 
-    $default_params = ["--user=${user}",
-                       "--group=${group}",
-                      "--with-pcre",
-                      "--with-pcre=${tmp}/pcre-${pcre_version}",
-                      "--with-pcre-conf-opt=--enable-utf",
-                      "--with-pcre-jit"]
+    $pcre_params = ["--with-pcre",
+                    "--with-pcre=${tmp}/pcre-${pcre_version}",
+                    "--with-pcre-conf-opt=--enable-utf",
+                    "--with-pcre-jit"]
+  }
+
+  $user_params = ["--user=${user}", "--group=${group}"]
+
+  if($with_pcre and $with_statsd) {
+    $default_params = concat($user_params, concat($pcre_params, $statsd_params))
+  } elsif($with_pcre) {
+    $default_params = concat($user_params, $pcre_params)
+  } elsif($with_statsd) {
+    $default_params = concat($user_params, $statsd_params)
   } else {
-    $default_params = ["--user=${user}", "--group=${group}"]
+    $default_params = $user_params
   }
 
   $params = join(concat($configure_params, $default_params), ' ')
