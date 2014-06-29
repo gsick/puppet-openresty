@@ -120,7 +120,7 @@ class openresty(
     exec { 'untar nginx-statsd':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "tar -zxvf nginx-statsd-${statsd_version}.tar.gz",
+      command => "mkdir nginx-statsd-${statsd_version} && tar -zxvf nginx-statsd-${statsd_version}.tar.gz -C /tmp/nginx-statsd-master --strip-components 1",
       creates => "${tmp}/nginx-statsd-${statsd_version}/config",
       notify  => Exec['configure openresty'],
     }
