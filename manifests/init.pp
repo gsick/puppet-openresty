@@ -37,6 +37,7 @@
 #
 class openresty(
   $version                = '1.7.2.1',
+  $nginx_version          = '1.7.2',
   $user                   = 'nginx',
   $group                  = 'nginx',
   $nginx_like_install     = false,
@@ -50,9 +51,11 @@ class openresty(
   $tmp                    = '/tmp',
   $service_ensure         = 'running',
   $service_enable         = true,
+  $server_name            = 'openresty',
 ) {
 
   validate_string($version)
+  validate_string($nginx_version)
   validate_string($user)
   validate_string($group)
   validate_bool($nginx_like_install)
@@ -66,6 +69,7 @@ class openresty(
   validate_absolute_path($tmp)
   validate_string($service_ensure)
   validate_bool($service_enable)
+  validate_string($server_name)
 
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
 
@@ -107,6 +111,38 @@ class openresty(
     path    => '/sbin:/bin:/usr/bin',
     command => "tar -zxvf ngx_openresty-${version}.tar.gz",
     creates => "${tmp}/ngx_openresty-${version}/configure",
+    notify  => Exec['configure openresty'],
+  }
+
+  file { 'nginx.h':
+    ensure  => 'file',
+    path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/core/nginx.h",
+    content => template("${module_name}/nginx/src/core/nginx.h.erb"),
+    require => Exec['untar openresty'],
+    notify  => Exec['configure openresty'],
+  }
+
+  file { 'ngx_http_header_filter_module.c':
+    ensure  => 'file',
+    path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/http/ngx_http_header_filter_module.c",
+    content => template("${module_name}/nginx/src/http/ngx_http_header_filter_module.c.erb"),
+    require => Exec['untar openresty'],
+    notify  => Exec['configure openresty'],
+  }
+
+  file { 'ngx_http_spdy_filter_module.c':
+    ensure  => 'file',
+    path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/http/ngx_http_spdy_filter_module.c",
+    content => template("${module_name}/nginx/src/http/ngx_http_spdy_filter_module.c.erb"),
+    require => Exec['untar openresty'],
+    notify  => Exec['configure openresty'],
+  }
+
+  file { 'ngx_http_special_response.c':
+    ensure  => 'file',
+    path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/http/ngx_http_special_response.c",
+    content => template("${module_name}/nginx/src/http/ngx_http_special_response.c.erb"),
+    require => Exec['untar openresty'],
     notify  => Exec['configure openresty'],
   }
 
@@ -174,7 +210,7 @@ class openresty(
     path    => '/sbin:/bin:/usr/bin',
     command => "${tmp}/ngx_openresty-${version}/configure ${params}",
     creates => "${tmp}/ngx_openresty-${version}/build",
-    require => Package['perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'],
+    require => [Exec['untar openresty'], Package['perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel']],
     notify  => Exec['install openresty'],
   }
 
