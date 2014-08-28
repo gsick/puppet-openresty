@@ -36,20 +36,20 @@
 # Copyright 2014 Agilience, Gamaliel Sick, unless otherwise noted.
 #
 class openresty(
-  $version                = hiera('openresty::version', '1.7.0.1'),
-  $user                   = hiera('openresty::user', 'nginx'),
-  $group                  = hiera('openresty::group', 'nginx'),
-  $nginx_like_install     = hiera('openresty::nginx_like_install', false),
-  $configure_params       = hiera_array('openresty::configure_params', []),
-  $with_pcre              = hiera(openresty::with_pcre, false),
-  $pcre_version           = hiera(openresty::with_pcre_version, '8.35'),
-  $with_lua_resty_http    = hiera('openresty::with_lua_resty_http', false),
-  $lua_resty_http_version = hiera('openresty::lua_resty_http_version', '0.03'),
-  $with_statsd            = hiera(openresty::with_statsd, false),
-  $statsd_version         = hiera(openresty::statsd_version, 'master'),
-  $tmp                    = hiera('openresty::tmp', '/tmp'),
-  $service_ensure         = hiera('openresty::service_ensure', 'running'),
-  $service_enable         = hiera('openresty::service_enable', 'true'),
+  $version                = '1.7.2.1',
+  $user                   = 'nginx',
+  $group                  = 'nginx',
+  $nginx_like_install     = false,
+  $configure_params       = [],
+  $with_pcre              = false,
+  $pcre_version           = '8.35',
+  $with_lua_resty_http    = false,
+  $lua_resty_http_version = '0.03',
+  $with_statsd            = false,
+  $statsd_version         = 'master',
+  $tmp                    = '/tmp',
+  $service_ensure         = 'running',
+  $service_enable         = true,
 ) {
 
   validate_string($version)
@@ -61,8 +61,11 @@ class openresty(
   validate_string($pcre_version)
   validate_bool($with_lua_resty_http)
   validate_string($lua_resty_http_version)
+  validate_bool($with_statsd)
+  validate_string($statsd_version)
   validate_absolute_path($tmp)
   validate_string($service_ensure)
+  validate_bool($service_enable)
 
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
 
