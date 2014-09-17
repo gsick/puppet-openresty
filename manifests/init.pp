@@ -40,6 +40,7 @@ class openresty(
   $nginx_version          = '1.7.2',
   $user                   = 'nginx',
   $group                  = 'nginx',
+  $user_uid               = undef,
   $nginx_like_install     = false,
   $configure_params       = [],
   $with_pcre              = false,
@@ -86,15 +87,29 @@ class openresty(
     mode   => '0755',
   }
 
-  user { 'openresty user':
-    ensure  => 'present',
-    name    => $user,
-    groups  => $group,
-    comment => 'nginx web server',
-    shell   => '/sbin/nologin',
-    home    => '/var/cache/nginx',
-    system  => true,
-    require => [Group['openresty group'], File['openresty home']],
+  if($user_uid) {
+    user { 'openresty user':
+      ensure  => 'present',
+      name    => $user,
+      groups  => $group,
+      uid     => $user_uid,
+      comment => 'nginx web server',
+      shell   => '/sbin/nologin',
+      home    => '/var/cache/nginx',
+      system  => true,
+      require => [Group['openresty group'], File['openresty home']],
+    }
+  } else {
+    user { 'openresty user':
+      ensure  => 'present',
+      name    => $user,
+      groups  => $group,
+      comment => 'nginx web server',
+      shell   => '/sbin/nologin',
+      home    => '/var/cache/nginx',
+      system  => true,
+      require => [Group['openresty group'], File['openresty home']],
+    }
   }
 
   exec { 'download openresty':
