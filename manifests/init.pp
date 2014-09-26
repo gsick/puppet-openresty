@@ -41,6 +41,7 @@ class openresty(
   $user                   = 'nginx',
   $group                  = 'nginx',
   $user_uid               = undef,
+  $group_gid              = undef,
   $nginx_like_install     = false,
   $configure_params       = [],
   $with_pcre              = false,
@@ -74,9 +75,17 @@ class openresty(
 
   ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
 
-  group { 'openresty group':
-    ensure => 'present',
-    name   => $group,
+  if($group_gid) {
+    group { 'openresty group':
+      ensure => 'present',
+      name   => $group,
+      gid    => $group_gid,
+    }
+  } else {
+    group { 'openresty group':
+      ensure => 'present',
+      name   => $group,
+    }
   }
 
   file { 'openresty home':
