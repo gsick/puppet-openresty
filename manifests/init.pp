@@ -54,6 +54,7 @@ class openresty(
   $service_ensure         = 'running',
   $service_enable         = true,
   $server_name            = 'openresty',
+  $ld_flags               = undef,
 ) {
 
   validate_string($version)
@@ -215,14 +216,26 @@ class openresty(
                     "--with-pcre-jit"]
   }
 
+  if($ld_flags) {
+    $ld_flags_params = ["--with-ld-opt=\"${ld_flags}\""]
+  }
+
   $user_params = ["--user=${user}", "--group=${group}"]
 
-  if($with_pcre and $with_statsd) {
+  if($with_pcre and $with_statsd and $ld_flags) {
+    $default_params = concat($user_params, concat($pcre_params, concat($statsd_params, $ld_flags_params)))
+  } elsif($with_pcre and $with_statsd) {
     $default_params = concat($user_params, concat($pcre_params, $statsd_params))
+  } elsif($with_pcre and $ld_flags) {
+    $default_params = concat($user_params, concat($pcre_params, $ld_flags_params))
   } elsif($with_pcre) {
     $default_params = concat($user_params, $pcre_params)
+  } elsif($with_statsd and $ld_flags) {
+    $default_params = concat($user_params, concat($statsd_params, $ld_flags_params))
   } elsif($with_statsd) {
     $default_params = concat($user_params, $statsd_params)
+  } elsif($ld_flags) {
+    $default_params = concat($user_params, $ld_flags_params)
   } else {
     $default_params = $user_params
   }
