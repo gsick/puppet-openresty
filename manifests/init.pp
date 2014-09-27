@@ -242,6 +242,8 @@ class openresty(
 
   $params = join(concat($configure_params, $default_params), ' ')
 
+  notice("Configure: ${params}")
+
   exec { 'configure openresty':
     cwd     => "${tmp}/ngx_openresty-${version}",
     path    => '/sbin:/bin:/usr/bin',
