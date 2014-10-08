@@ -47,7 +47,7 @@ class openresty(
   $with_pcre              = false,
   $pcre_version           = '8.35',
   $with_lua_resty_http    = false,
-  $lua_resty_http_version = '0.03',
+  $lua_resty_http_version = '0.04',
   $with_statsd            = false,
   $statsd_version         = 'master',
   $tmp                    = '/tmp',
