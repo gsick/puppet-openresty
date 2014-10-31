@@ -256,8 +256,8 @@ class openresty(
   exec { 'install openresty':
     cwd     => "${tmp}/ngx_openresty-${version}",
     path    => '/sbin:/bin:/usr/bin',
-    command => 'make && make install',
-    creates => '/usr/local/openresty/nginx/sbin/nginx',
+    command => "make && make install && touch /usr/local/openresty/version-${version}.txt",
+    creates => "/usr/local/openresty/version-${version}.txt",
     require => [User['openresty user'], Exec['configure openresty']],
   }
 
