@@ -36,8 +36,8 @@
 # Copyright 2014 Agilience, Gamaliel Sick, unless otherwise noted.
 #
 class openresty(
-  $version                = '1.7.4.1',
-  $nginx_version          = '1.7.4',
+  $version                = '1.7.7.1',
+  $nginx_version          = '1.7.7',
   $user                   = 'nginx',
   $group                  = 'nginx',
   $user_uid               = undef,
@@ -47,7 +47,7 @@ class openresty(
   $with_pcre              = false,
   $pcre_version           = '8.35',
   $with_lua_resty_http    = false,
-  $lua_resty_http_version = '0.04',
+  $lua_resty_http_version = '0.05',
   $with_statsd            = false,
   $statsd_version         = 'master',
   $tmp                    = '/tmp',
@@ -74,8 +74,8 @@ class openresty(
   validate_bool($service_enable)
   validate_string($server_name)
 
-  ensure_packages(['wget', 'perl', 'gcc', 'readline-devel', 'pcre-devel', 'openssl-devel'])
-
+  ensure_packages(['wget', 'perl', 'gcc', 'gcc-c++', 'readline-devel', 'pcre-devel', 'openssl-devel', 'bzip2'])
+#/sbin/chkconfig nginx on
   if($group_gid) {
     group { 'openresty group':
       ensure => 'present',
