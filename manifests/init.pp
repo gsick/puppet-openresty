@@ -36,8 +36,8 @@
 # Copyright 2014 Agilience, Gamaliel Sick, unless otherwise noted.
 #
 class openresty(
-  $version                = '1.7.7.1',
-  $nginx_version          = '1.7.7',
+  $version                = '1.7.4.1',
+  $nginx_version          = '1.7.4',
   $user                   = 'nginx',
   $group                  = 'nginx',
   $user_uid               = undef,
