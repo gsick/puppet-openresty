@@ -9,7 +9,7 @@
 #define _NGINX_H_INCLUDED_
 
 
-#define nginx_version      <%= @nginx_version.gsub('\.', '00') %>
+#define nginx_version      <%= @nginx_version.gsub(/\./, "00") %>
 #define NGINX_VERSION      "<%= @nginx_version %>"
 #define NGINX_VER          "<%= @server_name %>/" NGINX_VERSION ".1"
 
