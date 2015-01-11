@@ -7,4 +7,4 @@ summary      'OpenResty installation module'
 description  'Puppet module for installing OpenResty'
 project_page 'https://github.com/gsick/puppet-openresty'
 
-dependency   'puppetlabs/stdlib', '>= 4.2.2'
+dependency   'puppetlabs/stdlib', '>= 4.5.0'
