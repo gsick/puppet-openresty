@@ -313,7 +313,7 @@ class openresty(
     exec { 'install lua-resty-http':
       cwd     => "${tmp}/lua-resty-http-${lua_resty_http_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "cp -f lib/resty/http.lua /usr/local/openresty/lualib/resty",
+      command => "cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty",
       creates => "/usr/local/openresty/lualib/resty/http.lua",
       require => Exec['install openresty'],
       notify  => Service['nginx'],
