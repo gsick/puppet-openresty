@@ -235,11 +235,6 @@ class openresty(
     $ld_flags_params = ["--with-ld-opt=\"${ld_flags}\""]
   }
 
-  if(!$ld_flags) {
-    $default_params
-  }
-
-
   $user_params = ["--user=${user}", "--group=${group}"]
 
   if($with_geoip2 and $with_pcre and $with_statsd and $ld_flags) {
