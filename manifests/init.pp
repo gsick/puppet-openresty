@@ -157,6 +157,14 @@ class openresty(
     notify  => Exec['configure openresty'],
   }
 
+  #values($hash)
+  #$default_params = {
+  #  with_statsd => "--add-module=${tmp}/nginx-statsd-${statsd_version}",
+  #  with_geoip2 => "--add-module=${tmp}/ngx-http-geoip2-module-${geoip2_version}",
+  #  with_pcre   => "--with-pcre --with-pcre=${tmp}/pcre-${pcre_version} --with-pcre-conf-opt=--enable-utf --with-pcre-jit",
+  #  ld_flags    => "--with-ld-opt=\"${ld_flags}\"",
+  #}
+
   if($with_statsd) {
     exec { 'download nginx-statsd':
       cwd     => $tmp,
@@ -196,7 +204,7 @@ class openresty(
       notify  => Exec['configure openresty'],
     }
 
-    $statsd_params = ["--add-module=${tmp}/ngx-http-geoip2-module-${geoip2_version}"]
+    $geoip2_params = ["--add-module=${tmp}/ngx-http-geoip2-module-${geoip2_version}"]
   }
 
   if($with_pcre) {
@@ -227,9 +235,16 @@ class openresty(
     $ld_flags_params = ["--with-ld-opt=\"${ld_flags}\""]
   }
 
+  if(!$ld_flags) {
+    $default_params
+  }
+
+
   $user_params = ["--user=${user}", "--group=${group}"]
 
-  if($with_pcre and $with_statsd and $ld_flags) {
+  if($with_geoip2 and $with_pcre and $with_statsd and $ld_flags) {
+    $default_params = concat($geoip2_params, concat($user_params, concat($pcre_params, concat($statsd_params, $ld_flags_params))))
+  } elsif($with_pcre and $with_statsd and $ld_flags) {
     $default_params = concat($user_params, concat($pcre_params, concat($statsd_params, $ld_flags_params)))
   } elsif($with_pcre and $with_statsd) {
     $default_params = concat($user_params, concat($pcre_params, $statsd_params))
