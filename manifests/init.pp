@@ -39,6 +39,7 @@ class openresty(
   $ld_flags               = undef,
   $with_geoip2            = false,
   $geoip2_version         = '1.0',
+  $libmaxminddb_version   = '1.0.4',
 ) {
 
   validate_string($version)
@@ -59,6 +60,7 @@ class openresty(
   validate_string($server_name)
   validate_bool($with_geoip2)
   validate_string($geoip2_version)
+  validate_string($libmaxminddb_version)
 
   ensure_packages(['wget', 'perl', 'gcc', 'gcc-c++', 'readline-devel', 'pcre-devel', 'openssl-devel', 'bzip2'])
 #/sbin/chkconfig nginx on
@@ -230,6 +232,56 @@ class openresty(
       creates => "/usr/local/share/GeoLite2/GeoLite2-Country.mmdb",
       notify  => Service['nginx'],
       require => File['maxmind mmdb directory'],
+    }
+
+    exec { 'download libmaxminddb':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O libmaxminddb-${libmaxminddb_version}.tar.gz https://github.com/maxmind/libmaxminddb/archive/${libmaxminddb_version}.tar.gz",
+      creates => "${tmp}/libmaxminddb-${libmaxminddb_version}.tar.gz",
+      notify  => Exec['untar libmaxminddb'],
+      require => Package['wget'],
+    }
+
+    exec { 'untar libmaxminddb':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "tar -zxvf libmaxminddb-${libmaxminddb_version}.tar.gz -C /usr/local/src",
+      creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
+      notify  => Exec['autoreconf libmaxminddb'],
+    }
+
+    exec { 'autoreconf libmaxminddb':
+      cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
+      path    => '/sbin:/bin:/usr/bin',
+      command => "autoreconf -i",
+      notify  => Exec['libmaxminddb update configure.ac'],
+    }
+
+    file_line { 'libmaxminddb update configure.ac':
+      path  => '/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac',
+      line  => 'AC_CONFIG_MACRO_DIR([m4])',
+      notify  => Exec['libtoolize libmaxminddb'],
+    }
+
+    exec { 'libtoolize libmaxminddb':
+      cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
+      path    => '/sbin:/bin:/usr/bin',
+      command => "libtoolize",
+      notify  => Exec['libmaxminddb update configure.ac'],
+    }
+
+    file_line { 'libmaxminddb update Makefile.am':
+      path  => '/usr/local/src/libmaxminddb-${libmaxminddb_version}/Makefile.am',
+      line  => 'ACLOCAL_AMFLAGS = -I m4',
+      notify  => Exec['configure and install libmaxminddb'],
+    }
+
+    exec { 'configure and install libmaxminddb':
+      cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
+      path    => '/sbin:/bin:/usr/bin',
+      command => "./configure && make && make check && make install",
+      notify  => Exec['configure openresty'],
     }
 
     exec { 'download ngx-http-geoip2-module':
