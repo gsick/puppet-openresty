@@ -259,7 +259,7 @@ class openresty(
     }
 
     file_line { 'libmaxminddb update configure.ac':
-      path  => '/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac',
+      path  => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
       line  => 'AC_CONFIG_MACRO_DIR([m4])',
       notify  => Exec['libtoolize libmaxminddb'],
     }
@@ -272,7 +272,7 @@ class openresty(
     }
 
     file_line { 'libmaxminddb update Makefile.am':
-      path  => '/usr/local/src/libmaxminddb-${libmaxminddb_version}/Makefile.am',
+      path  => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/Makefile.am",
       line  => 'ACLOCAL_AMFLAGS = -I m4',
       notify  => Exec['configure and install libmaxminddb'],
     }
