@@ -210,7 +210,7 @@ class openresty(
     exec { 'gunzip maxmind City mmdb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "gunzip GeoLite2-City.mmdb.gz -C /usr/local/share/GeoLite2",
+      command => "gunzip -c GeoLite2-City.mmdb.gz > /usr/local/share/GeoLite2/GeoLite2-City.mmdb",
       creates => "/usr/local/share/GeoLite2/GeoLite2-City.mmdb",
       notify  => Service['nginx'],
       require => File['maxmind mmdb directory'],
@@ -228,7 +228,7 @@ class openresty(
     exec { 'gunzip maxmind Country mmdb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "gunzip GeoLite2-Country.mmdb.gz -C /usr/local/share/GeoLite2",
+      command => "gunzip -c GeoLite2-Country.mmdb.gz > /usr/local/share/GeoLite2/GeoLite2-Country.mmdb",
       creates => "/usr/local/share/GeoLite2/GeoLite2-Country.mmdb",
       notify  => Service['nginx'],
       require => File['maxmind mmdb directory'],
