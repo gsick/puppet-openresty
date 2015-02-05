@@ -39,7 +39,7 @@ class openresty(
   $ld_flags               = undef,
   $with_geoip2            = false,
   $geoip2_version         = '1.0',
-  $libmaxminddb_version   = '1.0.4',
+  $libmaxminddb_version   = 'master',
 ) {
 
   validate_string($version)
@@ -234,21 +234,22 @@ class openresty(
       require => File['maxmind mmdb directory'],
     }
 
-    exec { 'download libmaxminddb':
+    exec { 'download and untar libmaxminddb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O libmaxminddb-${libmaxminddb_version}.tar.gz https://github.com/maxmind/libmaxminddb/archive/${libmaxminddb_version}.tar.gz",
-      creates => "${tmp}/libmaxminddb-${libmaxminddb_version}.tar.gz",
-      notify  => Exec['untar libmaxminddb'],
+      command => "wget -O libmaxminddb-${libmaxminddb_version}.tar.gz https://github.com/maxmind/libmaxminddb/tarball/${libmaxminddb_version} && tar -zxvf libmaxminddb-${libmaxminddb_version}.tar.gz -C /usr/local/src",
+      creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
+      notify  => Exec['download and install libtap'],
       require => Package['wget'],
     }
 
-    exec { 'untar libmaxminddb':
+    exec { 'download and install libtap':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "tar -zxvf libmaxminddb-${libmaxminddb_version}.tar.gz -C /usr/local/src",
-      creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
+      command => "wget -O libtap-master.tar.gz  https://github.com/zorgnax/libtap/tarball/master && tar -xvzf libtap-master.tar.gz -C /usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap --strip-components 1",
+      creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap/Makefile",
       notify  => Exec['autoreconf libmaxminddb'],
+      require => Package['wget'],
     }
 
     exec { 'autoreconf libmaxminddb':
@@ -280,7 +281,7 @@ class openresty(
     exec { 'configure and install libmaxminddb':
       cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "./configure && make && make check && make install",
+      command => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure && make && make check && make install",
       notify  => Exec['configure openresty'],
     }
 
