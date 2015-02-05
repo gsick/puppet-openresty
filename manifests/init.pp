@@ -187,6 +187,51 @@ class openresty(
   }
 
   if($with_geoip2) {
+
+    file { 'maxmind mmdb directory':
+      ensure => 'directory',
+      path   => '/usr/local/share/GeoLite2',
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+    }
+
+    exec { 'download maxmind City mmdb':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O GeoLite2-City.mmdb.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz",
+      creates => "${tmp}/GeoLite2-City.mmdb.gz",
+      notify  => Exec['gunzip maxmind City mmdb'],
+      require => Package['wget'],
+    }
+
+    exec { 'gunzip maxmind City mmdb':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "gunzip GeoLite2-City.mmdb.gz -C /usr/local/share/GeoLite2",
+      creates => "/usr/local/share/GeoLite2/GeoLite2-City.mmdb",
+      notify  => Service['nginx'],
+      require => File['maxmind mmdb directory'],
+    }
+
+    exec { 'download maxmind Country mmdb':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O GeoLite2-Country.mmdb.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz",
+      creates => "${tmp}/GeoLite2-Country.mmdb.gz",
+      notify  => Exec['gunzip maxmind Country mmdb'],
+      require => Package['wget'],
+    }
+
+    exec { 'gunzip maxmind Country mmdb':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "gunzip GeoLite2-Country.mmdb.gz -C /usr/local/share/GeoLite2",
+      creates => "/usr/local/share/GeoLite2/GeoLite2-Country.mmdb",
+      notify  => Service['nginx'],
+      require => File['maxmind mmdb directory'],
+    }
+
     exec { 'download ngx-http-geoip2-module':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
