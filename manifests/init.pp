@@ -237,7 +237,7 @@ class openresty(
     exec { 'download and untar libmaxminddb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O libmaxminddb-${libmaxminddb_version}.tar.gz https://github.com/maxmind/libmaxminddb/tarball/${libmaxminddb_version} && tar -zxvf libmaxminddb-${libmaxminddb_version}.tar.gz -C /usr/local/src",
+      command => "wget -O libmaxminddb-${libmaxminddb_version}.tar.gz https://github.com/maxmind/libmaxminddb/tarball/${libmaxminddb_version} && mkdir /usr/local/src/libmaxminddb-${libmaxminddb_version} && tar -zxvf libmaxminddb-${libmaxminddb_version}.tar.gz -C /usr/local/src/libmaxminddb-${libmaxminddb_version} --strip-components 1",
       creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
       notify  => Exec['download and install libtap'],
       require => Package['wget'],
@@ -246,7 +246,7 @@ class openresty(
     exec { 'download and install libtap':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O libtap-master.tar.gz  https://github.com/zorgnax/libtap/tarball/master && tar -xvzf libtap-master.tar.gz -C /usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap --strip-components 1",
+      command => "wget -O libtap-0.1.0.tar.gz  https://github.com/zorgnax/libtap/tarball/0.1.0 && tar -xvzf libtap-0.1.0.tar.gz -C /usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap --strip-components 1",
       creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap/Makefile",
       notify  => Exec['autoreconf libmaxminddb'],
       require => Package['wget'],
@@ -281,7 +281,7 @@ class openresty(
     exec { 'configure and install libmaxminddb':
       cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure && make && make check && make install",
+      command => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure && make && make install",
       notify  => Exec['configure openresty'],
     }
 
