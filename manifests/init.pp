@@ -255,7 +255,7 @@ class openresty(
       cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
       path    => '/sbin:/bin:/usr/bin',
       command => "autoreconf -i",
-      notify  => Exec['libmaxminddb update configure.ac'],
+      notify  => File_line['libmaxminddb update configure.ac'],
     }
 
     file_line { 'libmaxminddb update configure.ac':
@@ -268,7 +268,7 @@ class openresty(
       cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
       path    => '/sbin:/bin:/usr/bin',
       command => "libtoolize",
-      notify  => Exec['libmaxminddb update configure.ac'],
+      notify  => File_line['libmaxminddb update configure.ac'],
     }
 
     file_line { 'libmaxminddb update Makefile.am':
