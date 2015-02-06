@@ -461,7 +461,7 @@ class openresty(
     exec { 'download lua-resty-cookie':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O lua-resty-cookie-${lua_resty_cookie_version}.tar.gz https://github.com/cloudflare/lua-resty-cookie/tarball/${lua_resty_cookie_version}.tar.gz",
+      command => "wget -O lua-resty-cookie-${lua_resty_cookie_version}.tar.gz https://github.com/cloudflare/lua-resty-cookie/tarball/${lua_resty_cookie_version}",
       creates => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}.tar.gz",
       notify  => Exec['untar lua-resty-cookie'],
       require => Package['wget'],
