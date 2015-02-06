@@ -463,7 +463,7 @@ class openresty(
       path    => '/sbin:/bin:/usr/bin',
       command => "wget -O lua-resty-cookie-${lua_resty_cookie_version}.tar.gz https://github.com/cloudflare/lua-resty-cookie/tarball/${lua_resty_cookie_version}",
       creates => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}.tar.gz",
-      notify  => Exec['lua-resty-cookie directory'],
+      notify  => File['lua-resty-cookie directory'],
       require => Package['wget'],
     }
 
