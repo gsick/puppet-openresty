@@ -463,14 +463,23 @@ class openresty(
       path    => '/sbin:/bin:/usr/bin',
       command => "wget -O lua-resty-cookie-${lua_resty_cookie_version}.tar.gz https://github.com/cloudflare/lua-resty-cookie/tarball/${lua_resty_cookie_version}",
       creates => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}.tar.gz",
-      notify  => Exec['untar lua-resty-cookie'],
+      notify  => Exec['lua-resty-cookie directory'],
       require => Package['wget'],
+    }
+
+    file { 'lua-resty-cookie directory':
+      ensure => 'directory',
+      path   => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}",
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+      notify  => Exec['untar lua-resty-cookie'],
     }
 
     exec { 'untar lua-resty-cookie':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "tar -zxvf lua-resty-cookie-${lua_resty_cookie_version}.tar.gz",
+      command => "tar -zxvf lua-resty-cookie-${lua_resty_cookie_version}.tar.gz -C ${tmp}/lua-resty-cookie-${lua_resty_cookie_version} --strip-components 1",
       creates => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}/README.md",
       notify  => Exec['install lua-resty-cookie'],
     }
