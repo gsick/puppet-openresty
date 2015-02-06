@@ -30,6 +30,8 @@ class openresty(
   $pcre_version           = '8.35',
   $with_lua_resty_http    = false,
   $lua_resty_http_version = '0.05',
+  $with_lua_resty_cookie    = false,
+  $lua_resty_cookie_version = 'master',
   $with_statsd            = false,
   $statsd_version         = 'master',
   $tmp                    = '/tmp',
@@ -52,6 +54,8 @@ class openresty(
   validate_string($pcre_version)
   validate_bool($with_lua_resty_http)
   validate_string($lua_resty_http_version)
+  validate_bool($with_lua_resty_cookie)
+  validate_string($lua_resty_cookie_version)
   validate_bool($with_statsd)
   validate_string($statsd_version)
   validate_absolute_path($tmp)
@@ -453,4 +457,31 @@ class openresty(
     }
   }
 
+  if($with_lua_resty_cookie) {
+    exec { 'download lua-resty-cookie':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O lua-resty-cookie-${lua_resty_cookie_version}.tar.gz https://github.com/cloudflare/lua-resty-cookie/tarball/${lua_resty_cookie_version}.tar.gz",
+      creates => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}.tar.gz",
+      notify  => Exec['untar lua-resty-cookie'],
+      require => Package['wget'],
+    }
+
+    exec { 'untar lua-resty-cookie':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "tar -zxvf lua-resty-cookie-${lua_resty_cookie_version}.tar.gz",
+      creates => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}/README.md",
+      notify  => Exec['install lua-resty-cookie'],
+    }
+
+    exec { 'install lua-resty-cookie':
+      cwd     => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}",
+      path    => '/sbin:/bin:/usr/bin',
+      command => "cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty",
+      creates => "/usr/local/openresty/lualib/resty/cookie.lua",
+      require => Exec['install openresty'],
+      notify  => Service['nginx'],
+    }
+  }
 }
