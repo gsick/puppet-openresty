@@ -32,6 +32,8 @@ class openresty(
   $lua_resty_http_version = '0.05',
   $with_lua_resty_cookie    = false,
   $lua_resty_cookie_version = 'master',
+  $with_lua_resty_template    = false,
+  $lua_resty_template_version = '1.5',
   $with_statsd            = false,
   $statsd_version         = 'master',
   $tmp                    = '/tmp',
@@ -489,6 +491,34 @@ class openresty(
       path    => '/sbin:/bin:/usr/bin',
       command => "cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty",
       creates => "/usr/local/openresty/lualib/resty/cookie.lua",
+      require => Exec['install openresty'],
+      notify  => Service['nginx'],
+    }
+  }
+
+  if($with_lua_resty_template) {
+    exec { 'download lua-resty-template':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O lua-resty-template-${lua_resty_template_version}.tar.gz https://github.com/bungle/lua-resty-template/archive/v${lua_resty_template_version}.tar.gz",
+      creates => "${tmp}/lua-resty-template-${lua_resty_template_version}.tar.gz",
+      notify  => Exec['untar lua-resty-template'],
+      require => Package['wget'],
+    }
+
+    exec { 'untar lua-resty-template':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "tar -zxvf lua-resty-template-${lua_resty_template_version}.tar.gz",
+      creates => "${tmp}/lua-resty-template-${lua_resty_template_version}/README.md",
+      notify  => Exec['install lua-resty-template'],
+    }
+
+    exec { 'install lua-resty-template':
+      cwd     => "${tmp}/lua-resty-template-${lua_resty_template_version}",
+      path    => '/sbin:/bin:/usr/bin',
+      command => "cp -rf lib/resty/* /usr/local/openresty/lualib/resty",
+      creates => "/usr/local/openresty/lualib/resty/template.lua",
       require => Exec['install openresty'],
       notify  => Service['nginx'],
     }
