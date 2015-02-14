@@ -502,8 +502,17 @@ class openresty(
       path    => '/sbin:/bin:/usr/bin',
       command => "wget -O lua-resty-template-${lua_resty_template_version}.tar.gz https://github.com/bungle/lua-resty-template/archive/v${lua_resty_template_version}.tar.gz",
       creates => "${tmp}/lua-resty-template-${lua_resty_template_version}.tar.gz",
-      notify  => Exec['untar lua-resty-template'],
+      notify  => File['lua-resty-template directory'],
       require => Package['wget'],
+    }
+
+    file { 'lua-resty-template directory':
+      ensure => 'directory',
+      path   => "${tmp}/lua-resty-template-${lua_resty_template_version}",
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+      notify  => Exec['untar lua-resty-template'],
     }
 
     exec { 'untar lua-resty-template':
