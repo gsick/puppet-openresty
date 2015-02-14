@@ -518,7 +518,7 @@ class openresty(
     exec { 'untar lua-resty-template':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "tar -zxvf lua-resty-template-${lua_resty_template_version}.tar.gz",
+      command => "tar -zxvf lua-resty-template-${lua_resty_template_version}.tar.gz -C ${tmp}/lua-resty-template-${lua_resty_template_version} --strip-components 1",
       creates => "${tmp}/lua-resty-template-${lua_resty_template_version}/README.md",
       notify  => Exec['install lua-resty-template'],
     }
