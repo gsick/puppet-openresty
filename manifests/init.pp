@@ -72,19 +72,19 @@ class openresty(
 #/sbin/chkconfig nginx on
   if($group_gid) {
     group { 'openresty group':
-      ensure => 'present',
+      ensure => present,
       name   => $group,
       gid    => $group_gid,
     }
   } else {
     group { 'openresty group':
-      ensure => 'present',
+      ensure => present,
       name   => $group,
     }
   }
 
   file { 'openresty home':
-    ensure => 'directory',
+    ensure => directory,
     path   => '/var/cache/nginx',
     owner  => 'root',
     group  => 'root',
@@ -93,7 +93,7 @@ class openresty(
 
   if($user_uid) {
     user { 'openresty user':
-      ensure  => 'present',
+      ensure  => present,
       name    => $user,
       groups  => $group,
       uid     => $user_uid,
@@ -105,7 +105,7 @@ class openresty(
     }
   } else {
     user { 'openresty user':
-      ensure  => 'present',
+      ensure  => present,
       name    => $user,
       groups  => $group,
       comment => 'nginx web server',
@@ -134,7 +134,7 @@ class openresty(
   }
 
   file { 'nginx.h':
-    ensure  => 'file',
+    ensure  => file,
     path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/core/nginx.h",
     content => template("${module_name}/nginx/src/core/nginx.h.erb"),
     require => Exec['untar openresty'],
@@ -142,7 +142,7 @@ class openresty(
   }
 
   file { 'ngx_http_header_filter_module.c':
-    ensure  => 'file',
+    ensure  => file,
     path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/http/ngx_http_header_filter_module.c",
     content => template("${module_name}/nginx/src/http/ngx_http_header_filter_module.c.erb"),
     require => Exec['untar openresty'],
@@ -150,7 +150,7 @@ class openresty(
   }
 
   file { 'ngx_http_spdy_filter_module.c':
-    ensure  => 'file',
+    ensure  => file,
     path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/http/ngx_http_spdy_filter_module.c",
     content => template("${module_name}/nginx/src/http/ngx_http_spdy_filter_module.c.erb"),
     require => Exec['untar openresty'],
@@ -158,7 +158,7 @@ class openresty(
   }
 
   file { 'ngx_http_special_response.c':
-    ensure  => 'file',
+    ensure  => file,
     path    => "${tmp}/ngx_openresty-${version}/bundle/nginx-${nginx_version}/src/http/ngx_http_special_response.c",
     content => template("${module_name}/nginx/src/http/ngx_http_special_response.c.erb"),
     require => Exec['untar openresty'],
@@ -186,7 +186,7 @@ class openresty(
     exec { 'untar nginx-statsd':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "mkdir nginx-statsd-${statsd_version} && tar -zxvf nginx-statsd-${statsd_version}.tar.gz -C ${tmp}/nginx-statsd-${statsd_version} --strip-components 1",
+      command => "mkdir -p nginx-statsd-${statsd_version} && tar -zxvf nginx-statsd-${statsd_version}.tar.gz -C ${tmp}/nginx-statsd-${statsd_version} --strip-components 1",
       creates => "${tmp}/nginx-statsd-${statsd_version}/config",
       notify  => Exec['configure openresty'],
     }
@@ -197,7 +197,7 @@ class openresty(
   if($with_geoip2) {
 
     file { 'maxmind mmdb directory':
-      ensure => 'directory',
+      ensure => directory,
       path   => '/usr/local/share/GeoLite2',
       owner  => 'root',
       group  => 'root',
@@ -207,7 +207,7 @@ class openresty(
     exec { 'download maxmind City mmdb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O GeoLite2-City.mmdb.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz",
+      command => 'wget -O GeoLite2-City.mmdb.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz',
       creates => "${tmp}/GeoLite2-City.mmdb.gz",
       notify  => Exec['gunzip maxmind City mmdb'],
       require => Package['wget'],
@@ -216,8 +216,8 @@ class openresty(
     exec { 'gunzip maxmind City mmdb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "gunzip -c GeoLite2-City.mmdb.gz > /usr/local/share/GeoLite2/GeoLite2-City.mmdb",
-      creates => "/usr/local/share/GeoLite2/GeoLite2-City.mmdb",
+      command => 'gunzip -c GeoLite2-City.mmdb.gz > /usr/local/share/GeoLite2/GeoLite2-City.mmdb',
+      creates => '/usr/local/share/GeoLite2/GeoLite2-City.mmdb',
       notify  => Service['nginx'],
       require => File['maxmind mmdb directory'],
     }
@@ -225,7 +225,7 @@ class openresty(
     exec { 'download maxmind Country mmdb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O GeoLite2-Country.mmdb.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz",
+      command => 'wget -O GeoLite2-Country.mmdb.gz http://geolite.maxmind.com/download/geoip/database/GeoLite2-Country.mmdb.gz',
       creates => "${tmp}/GeoLite2-Country.mmdb.gz",
       notify  => Exec['gunzip maxmind Country mmdb'],
       require => Package['wget'],
@@ -234,8 +234,8 @@ class openresty(
     exec { 'gunzip maxmind Country mmdb':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "gunzip -c GeoLite2-Country.mmdb.gz > /usr/local/share/GeoLite2/GeoLite2-Country.mmdb",
-      creates => "/usr/local/share/GeoLite2/GeoLite2-Country.mmdb",
+      command => 'gunzip -c GeoLite2-Country.mmdb.gz > /usr/local/share/GeoLite2/GeoLite2-Country.mmdb',
+      creates => '/usr/local/share/GeoLite2/GeoLite2-Country.mmdb',
       notify  => Service['nginx'],
       require => File['maxmind mmdb directory'],
     }
@@ -252,8 +252,8 @@ class openresty(
     exec { 'download and install libtap':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "wget -O libtap-1d8d185b6289625183544a6bd9b1457f2b6011bc.tar.gz  https://github.com/zorgnax/libtap/tarball/1d8d185b6289625183544a6bd9b1457f2b6011bc && tar -xvzf libtap-1d8d185b6289625183544a6bd9b1457f2b6011bc.tar.gz -C /usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap --strip-components 1",
-      creates => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap/Makefile",
+      command => 'wget -O libtap-1d8d185b6289625183544a6bd9b1457f2b6011bc.tar.gz  https://github.com/zorgnax/libtap/tarball/1d8d185b6289625183544a6bd9b1457f2b6011bc && tar -xvzf libtap-1d8d185b6289625183544a6bd9b1457f2b6011bc.tar.gz -C /usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap --strip-components 1',
+      creates => '/usr/local/src/libmaxminddb-${libmaxminddb_version}/t/libtap/Makefile',
       notify  => Exec['autoreconf libmaxminddb'],
       require => Package['wget'],
     }
@@ -261,27 +261,27 @@ class openresty(
     exec { 'autoreconf libmaxminddb':
       cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "autoreconf -i",
+      command => 'autoreconf -i',
       notify  => File_line['libmaxminddb update configure.ac'],
     }
 
     file_line { 'libmaxminddb update configure.ac':
-      path  => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
-      line  => 'AC_CONFIG_MACRO_DIR([m4])',
-      notify  => Exec['libtoolize libmaxminddb'],
+      path   => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/configure.ac",
+      line   => 'AC_CONFIG_MACRO_DIR([m4])',
+      notify => Exec['libtoolize libmaxminddb'],
     }
 
     exec { 'libtoolize libmaxminddb':
       cwd     => "/usr/local/src/libmaxminddb-${libmaxminddb_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "libtoolize",
+      command => 'libtoolize',
       notify  => File_line['libmaxminddb update Makefile.am'],
     }
 
     file_line { 'libmaxminddb update Makefile.am':
-      path  => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/Makefile.am",
-      line  => 'ACLOCAL_AMFLAGS = -I m4',
-      notify  => Exec['configure and install libmaxminddb'],
+      path   => "/usr/local/src/libmaxminddb-${libmaxminddb_version}/Makefile.am",
+      line   => 'ACLOCAL_AMFLAGS = -I m4',
+      notify => Exec['configure and install libmaxminddb'],
     }
 
     exec { 'configure and install libmaxminddb':
@@ -303,7 +303,7 @@ class openresty(
     exec { 'untar ngx-http-geoip2-module':
       cwd     => $tmp,
       path    => '/sbin:/bin:/usr/bin',
-      command => "mkdir ngx-http-geoip2-module-${geoip2_version} && tar -zxvf ngx-http-geoip2-module-${geoip2_version}.tar.gz -C ${tmp}/ngx-http-geoip2-module-${geoip2_version} --strip-components 1",
+      command => "mkdir -p ngx-http-geoip2-module-${geoip2_version} && tar -zxvf ngx-http-geoip2-module-${geoip2_version}.tar.gz -C ${tmp}/ngx-http-geoip2-module-${geoip2_version} --strip-components 1",
       creates => "${tmp}/ngx-http-geoip2-module-${geoip2_version}/config",
       notify  => Exec['configure openresty'],
     }
@@ -329,10 +329,10 @@ class openresty(
       notify  => Exec['configure openresty'],
     }
 
-    $pcre_params = ["--with-pcre",
+    $pcre_params = ['--with-pcre',
                     "--with-pcre=${tmp}/pcre-${pcre_version}",
-                    "--with-pcre-conf-opt=--enable-utf",
-                    "--with-pcre-jit"]
+                    '--with-pcre-conf-opt=--enable-utf',
+                    '--with-pcre-jit']
   }
 
   if($ld_flags) {
@@ -404,7 +404,7 @@ class openresty(
   }
 
   file { 'openresty logrotate':
-    ensure  => 'file',
+    ensure  => file,
     path    => '/etc/logrotate.d/nginx',
     content => template("${module_name}/openresty.logrotate.erb"),
     owner   => 'root',
@@ -413,7 +413,7 @@ class openresty(
   }
 
   file { 'openresty init script':
-    ensure  => 'file',
+    ensure  => file,
     path    => '/etc/init.d/nginx',
     content => template("${module_name}/openresty.erb"),
     owner   => 'root',
@@ -452,8 +452,8 @@ class openresty(
     exec { 'install lua-resty-http':
       cwd     => "${tmp}/lua-resty-http-${lua_resty_http_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty",
-      creates => "/usr/local/openresty/lualib/resty/http.lua",
+      command => '/bin/cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty',
+      creates => '/usr/local/openresty/lualib/resty/http.lua',
       require => Exec['install openresty'],
       notify  => Service['nginx'],
     }
@@ -470,12 +470,12 @@ class openresty(
     }
 
     file { 'lua-resty-cookie directory':
-      ensure => 'directory',
+      ensure => directory,
       path   => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}",
       owner  => 'root',
       group  => 'root',
       mode   => '0755',
-      notify  => Exec['untar lua-resty-cookie'],
+      notify => Exec['untar lua-resty-cookie'],
     }
 
     exec { 'untar lua-resty-cookie':
@@ -489,8 +489,8 @@ class openresty(
     exec { 'install lua-resty-cookie':
       cwd     => "${tmp}/lua-resty-cookie-${lua_resty_cookie_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty",
-      creates => "/usr/local/openresty/lualib/resty/cookie.lua",
+      command => '/bin/cp -f lib/resty/*.lua /usr/local/openresty/lualib/resty',
+      creates => '/usr/local/openresty/lualib/resty/cookie.lua',
       require => Exec['install openresty'],
       notify  => Service['nginx'],
     }
@@ -507,12 +507,12 @@ class openresty(
     }
 
     file { 'lua-resty-template directory':
-      ensure => 'directory',
+      ensure => directory,
       path   => "${tmp}/lua-resty-template-${lua_resty_template_version}",
       owner  => 'root',
       group  => 'root',
       mode   => '0755',
-      notify  => Exec['untar lua-resty-template'],
+      notify => Exec['untar lua-resty-template'],
     }
 
     exec { 'untar lua-resty-template':
@@ -526,8 +526,8 @@ class openresty(
     exec { 'install lua-resty-template':
       cwd     => "${tmp}/lua-resty-template-${lua_resty_template_version}",
       path    => '/sbin:/bin:/usr/bin',
-      command => "cp -rf lib/resty/* /usr/local/openresty/lualib/resty",
-      creates => "/usr/local/openresty/lualib/resty/template.lua",
+      command => '/bin/cp -rf lib/resty/* /usr/local/openresty/lualib/resty',
+      creates => '/usr/local/openresty/lualib/resty/template.lua',
       require => Exec['install openresty'],
       notify  => Service['nginx'],
     }
