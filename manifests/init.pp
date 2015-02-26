@@ -44,6 +44,8 @@ class openresty(
   $with_geoip2            = false,
   $geoip2_version         = '1.0',
   $libmaxminddb_version   = 'master',
+  $with_lua_resty_nettle    = false,
+  $lua_resty_nettle_version = 'master',
 ) {
 
   validate_string($version)
@@ -67,6 +69,8 @@ class openresty(
   validate_bool($with_geoip2)
   validate_string($geoip2_version)
   validate_string($libmaxminddb_version)
+  validate_bool($with_lua_resty_nettle)
+  validate_string($lua_resty_nettle_version)
 
   ensure_packages(['wget', 'perl', 'gcc', 'gcc-c++', 'readline-devel', 'pcre-devel', 'openssl-devel', 'bzip2'])
 #/sbin/chkconfig nginx on
@@ -529,6 +533,46 @@ class openresty(
       command => '/bin/cp -rf lib/resty/* /usr/local/openresty/lualib/resty',
       creates => '/usr/local/openresty/lualib/resty/template.lua',
       require => Exec['install openresty'],
+      notify  => Service['nginx'],
+    }
+  }
+
+  if($with_lua_resty_nettle) {
+
+    ensure_packages(['nettle'])
+
+    exec { 'download lua-resty-nettle':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "wget -O lua-resty-nettle-${lua_resty_nettle_version}.tar.gz https://github.com/bungle/lua-resty-nettle/tarball/${lua_resty_nettle_version}",
+      creates => "${tmp}/lua-resty-nettle-${lua_resty_nettle_version}.tar.gz",
+      notify  => File['lua-resty-nettle directory'],
+      require => Package['wget'],
+    }
+
+    file { 'lua-resty-nettle directory':
+      ensure => directory,
+      path   => "${tmp}/lua-resty-nettle-${lua_resty_nettle_version}",
+      owner  => 'root',
+      group  => 'root',
+      mode   => '0755',
+      notify => Exec['untar lua-resty-nettle'],
+    }
+
+    exec { 'untar lua-resty-nettle':
+      cwd     => $tmp,
+      path    => '/sbin:/bin:/usr/bin',
+      command => "tar -zxvf lua-resty-nettle-${lua_resty_nettle_version}.tar.gz -C ${tmp}/lua-resty-nettle-${lua_resty_nettle_version} --strip-components 1",
+      creates => "${tmp}/lua-resty-nettle-${lua_resty_nettle_version}/README.md",
+      notify  => Exec['install lua-resty-nettle'],
+    }
+
+    exec { 'install lua-resty-nettle':
+      cwd     => "${tmp}/lua-resty-nettle-${lua_resty_nettle_version}",
+      path    => '/sbin:/bin:/usr/bin',
+      command => '/bin/cp -Rf lib/resty/* /usr/local/openresty/lualib/resty',
+      creates => '/usr/local/openresty/lualib/resty/nettle.lua',
+      require => [Exec['install openresty'], Package['nettle']],
       notify  => Service['nginx'],
     }
   }
