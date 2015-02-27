@@ -200,7 +200,7 @@ class openresty(
 
   if($with_geoip2) {
 
-    ensure_packages(['autoconf'])
+    ensure_packages(['autoconf', 'automake', 'libtool'])
 
     file { 'maxmind mmdb directory':
       ensure => directory,
