@@ -200,6 +200,8 @@ class openresty(
 
   if($with_geoip2) {
 
+    ensure_packages(['autoconf'])
+
     file { 'maxmind mmdb directory':
       ensure => directory,
       path   => '/usr/local/share/GeoLite2',
