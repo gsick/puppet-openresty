@@ -349,10 +349,8 @@ class openresty(
 
   if($with_geoip2 and $with_pcre and $with_statsd and $ld_flags) {
     $default_params = concat($geoip2_params, concat($user_params, concat($pcre_params, concat($statsd_params, $ld_flags_params))))
-  } elsif($with_geoip2 and $with_pcre and $with_statsd) {
-    $default_params = concat($geoip2_params, concat($user_params, concat($pcre_params, $statsd_params)))
-  } elsif($with_geoip2 and $with_pcre) {
-    $default_params = concat($geoip2_params, concat($user_params, $pcre_params))
+  } elsif($with_geoip2 and $with_pcre and $ld_flags) {
+    $default_params = concat($geoip2_params, concat($user_params, concat($pcre_params, $ld_flags_params)))
   } elsif($with_pcre and $with_statsd and $ld_flags) {
     $default_params = concat($user_params, concat($pcre_params, concat($statsd_params, $ld_flags_params)))
   } elsif($with_pcre and $with_statsd) {
