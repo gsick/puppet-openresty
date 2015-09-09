@@ -18,8 +18,8 @@
 # Copyright 2014 Agilience, Gamaliel Sick, unless otherwise noted.
 #
 class openresty(
-  $version                = '1.7.10.1',
-  $nginx_version          = '1.7.10',
+  $version                = '1.9.3.1',
+  $nginx_version          = '1.9.3',
   $user                   = 'nginx',
   $group                  = 'nginx',
   $user_uid               = undef,
@@ -29,7 +29,7 @@ class openresty(
   $with_pcre              = false,
   $pcre_version           = '8.37',
   $with_lua_resty_http    = false,
-  $lua_resty_http_version = '0.05',
+  $lua_resty_http_version = '0.06',
   $with_lua_resty_cookie    = false,
   $lua_resty_cookie_version = 'master',
   $with_lua_resty_template    = false,
